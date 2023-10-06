@@ -1,32 +1,42 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace VEBuserAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : ControllerBase, IDisposable
     {
+        private UserContext _db;
+        public UserController()
+        {
+            _db = new UserContext();
+        }
+
         // GET: api/<UserController>
         [HttpGet]
         public IEnumerable<User> Get()
         {
-            throw new NotImplementedException();
+            return _db.Users;
         }
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public User Get(int id)
+        public User Get(Guid id)
         {
-            throw new NotImplementedException();
+            return (User)_db.Users.Where(obj => obj.Id == id);
         }
 
         // POST api/<UserController>
         [HttpPost]
         public void Post([FromBody] User value)
         {
-            throw new NotImplementedException();
+            User user = new User();
+            user.Id = Guid.NewGuid();
+            user.Name = value.Name;
+            user.Age = value.Age;
+            user.Email = value.Email;
+            _db.Users.Add(user);
+            _db.SaveChanges();
         }
 
         // PUT api/<UserController>/5
@@ -41,6 +51,11 @@ namespace VEBuserAPI.Controllers
         public void Delete(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            _db.Dispose();
         }
     }
 }

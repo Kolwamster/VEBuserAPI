@@ -1,12 +1,15 @@
-﻿namespace VEBuserAPI
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VEBuserAPI
 {
     public class User
     {
-        private Guid _id;
-        private string _name;
-        private string _age;
-        private string _email;
-        private List<RoleEnum> _roles;
+        [Key]
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
+        public int Age { get; set; }
+        public string? Email { get; set; }
 
+        public User() {}
     }
 }
