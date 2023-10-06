@@ -23,7 +23,8 @@ namespace VEBuserAPI.Controllers
         [HttpGet("{id}")]
         public User Get(Guid id)
         {
-            return (User)_db.Users.Where(obj => obj.Id == id);
+            IQueryable<User> users = _db.Users.Where(obj => obj.Id == id);
+            return users.First();
         }
 
         // POST api/<UserController>
@@ -48,9 +49,12 @@ namespace VEBuserAPI.Controllers
 
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(Guid id)
         {
-            throw new NotImplementedException();
+            User user = new User();
+            user.Id = id;
+            _db.Remove(user);
+            _db.SaveChanges();
         }
 
         public void Dispose()
