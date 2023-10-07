@@ -1,10 +1,11 @@
-﻿namespace VEBuserAPI
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VEBuserAPI
 {
-    public enum RoleEnum
+    public class Role
     {
-        User,
-        Admin,
-        Support,
-        SuperAdmin
+        [Key]
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
     }
 }
