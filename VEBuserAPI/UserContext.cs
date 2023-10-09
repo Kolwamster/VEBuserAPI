@@ -5,7 +5,7 @@
     public class UserContext : DbContext
     {
         public DbSet<User> Users { get; set; } = null!;
-        public UserContext() { }
+        public DbSet<Role> Roles { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
