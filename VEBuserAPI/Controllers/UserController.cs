@@ -40,7 +40,16 @@ namespace VEBuserAPI.Controllers
             _db = new DataContext(config);
         }
 
-        // GET: api/<UserController>
+        /// <summary>
+        /// GET a page of records based on requirements.
+        /// </summary>
+        /// <param name="pageSize">Size of a page.</param>
+        /// <param name="pageIndex">Page number to return.</param>
+        /// <param name="userName">Filter for User name.</param>
+        /// <param name="age">Exact age required.</param>
+        /// <param name="email">Filter for User email.</param>
+        /// <param name="roleName">Filter for User's Role name.</param>
+        /// <returns>List of records fulfilling requirements representing selected page and status code.</returns>
         [HttpGet]
         public IActionResult GetUsers(int pageSize, int pageIndex, string? userName = "", int? age = 0, string? email = "", string? roleName = "")
         {
@@ -79,7 +88,11 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        // GET api/<UserController>/5
+        /// <summary>
+        /// GET a User based on its Id.
+        /// </summary>
+        /// <param name="id">Id of a record.</param>
+        /// <returns>Specific record by its Id and status code.</returns>
         [HttpGet("{id}")]
         public IActionResult GetUser(Guid id)
         {
@@ -96,7 +109,11 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        // POST api/<UserController>
+        /// <summary>
+        /// POST a User record.
+        /// </summary>
+        /// <param name="value">Record to POST.</param>
+        /// <returns>Status code.</returns>
         [HttpPost]
         public IActionResult PostUser([FromBody] User value)
         {
@@ -115,7 +132,12 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        // PUT api/<UserController>/5
+        /// <summary>
+        /// PUT method for User entity.
+        /// </summary>
+        /// <param name="id">Id of resource.</param>
+        /// <param name="value">New record data.</param>
+        /// <returns>Status code.</returns>
         [HttpPut("{id}")]
         public ActionResult PutUser(Guid id, [FromBody] User value)
         {
@@ -133,7 +155,12 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        // PUT api/<UserController>/AddRole/5
+        /// <summary>
+        /// PATCH User by adding a Role.
+        /// </summary>
+        /// <param name="id">Id of resource to PATCH.</param>
+        /// <param name="value">Role Id to add.</param>
+        /// <returns>Status code.</returns>
         [HttpPatch("AddRole/{id}")]
         public IActionResult AddUserRole(Guid id, [FromBody] Role value) 
         {
@@ -159,7 +186,11 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        // DELETE api/<UserController>/5
+        /// <summary>
+        /// DELETE User record from resource.
+        /// </summary>
+        /// <param name="id">Id of a resource.</param>
+        /// <returns>Status code.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(Guid id)
         {
