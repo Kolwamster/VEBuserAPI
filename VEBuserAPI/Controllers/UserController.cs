@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace VEBuserAPI.Controllers
 {
@@ -49,9 +50,15 @@ namespace VEBuserAPI.Controllers
         /// <param name="age">Exact age required.</param>
         /// <param name="email">Filter for User email.</param>
         /// <param name="roleName">Filter for User's Role name.</param>
+        /// <param name="orderBy">Column to order by.</param>
+        /// <param name="orderFlow">Order by flow.</param>
         /// <returns>List of records fulfilling requirements representing selected page and status code.</returns>
         [HttpGet]
-        public IActionResult GetUsers(int pageSize, int pageIndex, string? userName = "", int? age = 0, string? email = "", string? roleName = "")
+        public IActionResult GetUsers(
+            int pageSize, int pageIndex, 
+            string? userName = "", int? age = 0, 
+            string? email = "", string? roleName = "", 
+            string? orderBy = "", string? orderFlow = "asc")
         {
             if (pageSize <= 0 || pageIndex <= 0)
             {
@@ -77,10 +84,15 @@ namespace VEBuserAPI.Controllers
                     return NotFound();
                 }
 
-                var page = users.Skip(pageSize * (pageIndex - 1))
-                            .Take(pageSize)
-                            .ToList();
-                return Ok(page);
+                if (!string.IsNullOrEmpty(orderBy))
+                {
+                    users = users.OrderBy($"{orderBy} {orderFlow}");
+                }
+
+                users = users.Skip(pageSize * (pageIndex - 1))
+                            .Take(pageSize);
+
+                return Ok(users.ToList());
             }
             catch (Exception)
             {
