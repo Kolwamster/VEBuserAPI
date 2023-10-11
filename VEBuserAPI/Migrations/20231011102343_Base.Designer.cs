@@ -10,9 +10,9 @@ using VEBuserAPI;
 
 namespace VEBuserAPI.Migrations
 {
-    [DbContext(typeof(UserContext))]
-    [Migration("20231008071844_CreateBase")]
-    partial class CreateBase
+    [DbContext(typeof(DataContext))]
+    [Migration("20231011102343_Base")]
+    partial class Base
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,9 +59,11 @@ namespace VEBuserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
