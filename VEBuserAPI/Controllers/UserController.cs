@@ -35,9 +35,9 @@ namespace VEBuserAPI.Controllers
             }
         }
 
-        public UserController()
+        public UserController(IConfiguration config)
         {
-            _db = new DataContext();
+            _db = new DataContext(config);
         }
 
         // GET: api/<UserController>
@@ -54,32 +54,46 @@ namespace VEBuserAPI.Controllers
                 return BadRequest();
             }
 
-            var users = _db.Users
+            try
+            {
+                var users = _db.Users
                         .Include(user => user.Roles)
                         .Where(u => string.IsNullOrEmpty(userName) || u.Name.Contains(userName))
                         .Where(u => string.IsNullOrEmpty(email) || u.Email.Contains(email))
                         .Where(u => age == 0 || u.Age == age)
                         .Where(u => string.IsNullOrEmpty(roleName) || u.Roles.Any(r => r.Name.Contains(roleName)));
 
-            if (!users.Any())
-            {
-                return NotFound();
+                if (!users.Any())
+                {
+                    return NotFound();
+                }
+
+                var page = users.Skip(pageSize * (pageIndex - 1))
+                            .Take(pageSize)
+                            .ToList();
+                return Ok(page);
             }
-                        
-            var page = users.Skip(pageSize * (pageIndex - 1))
-                        .Take(pageSize)
-                        .ToList();
-            return Ok(page);
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
         public IActionResult GetUser(Guid id)
         {
-            var users = _db.Users
+            try
+            {
+                var users = _db.Users
                         .Include(user => user.Roles)
                         .Where(u => u.Id == id);
-            return users.Any() ? Ok(users.First()) : NotFound();
+                return users.Any() ? Ok(users.First()) : NotFound();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         // POST api/<UserController>
