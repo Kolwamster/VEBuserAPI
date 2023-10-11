@@ -7,79 +7,120 @@ namespace VEBuserAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase, IDisposable
     {
-        private UserContext _db;
+        private DataContext _db;
+
+        private void ValidateUser(User user)
+        {
+            if (string.IsNullOrEmpty(user.Name))
+            {
+                throw new ArgumentNullException(nameof(user.Name));
+            }
+
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                throw new ArgumentNullException(nameof(user.Email));
+            }
+
+            if (user.Age <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(user.Age));
+            }
+        }
+
+        private void ValidateEmail(User user)
+        {
+            if (_db.Users.Count(u => u.Email == user.Email) > 0)
+            {
+                throw new ArgumentException($"{user.Email} is already in use.");
+            }
+        }
 
         public UserController()
         {
-            _db = new UserContext();
+            _db = new DataContext();
         }
 
         // GET: api/<UserController>
-        [HttpGet("{pageSize}-{pageIndex}")]
-        public IEnumerable<object> Get(int pageSize, int pageIndex)
+        [HttpGet]
+        public IEnumerable<object> GetUsers(int pageSize, int pageIndex, string? userName = "", int? age = 0, string? email = "", string? roleName = "")
         {
-            var users = _db.Users.Skip(pageSize * (pageIndex - 1)).Take(pageSize)
-                        .SelectMany(u => u.Roles, (u, r) =>
-                            new {
-                                Id = u.Id,
-                                Name = u.Name,
-                                Age = u.Age,
-                                Email = u.Email,
-                                Roles = u.Roles
-                            }
-                        )
+            var users = _db.Users
+                        .Include(user => user.Roles)
+                        .Where(u => string.IsNullOrEmpty(userName) || u.Name.Contains(userName))
+                        .Where(u => string.IsNullOrEmpty(email) || u.Email.Contains(email))
+                        .Where(u => age == 0 || u.Age == age)
+                        .Where(u => string.IsNullOrEmpty(roleName) || u.Roles.Any(r => r.Name.Contains(roleName)));
+                        
+            var page = users.Skip(pageSize * (pageIndex - 1))
+                        .Take(pageSize)
                         .ToList();
-            return users;
+            return page;
         }
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public object Get(Guid id)
+        public object GetUser(Guid id)
         {
             var users = _db.Users
-                        .Where(u => u.Id == id)
-                        .SelectMany(u => u.Roles, (u, i) =>
-                            new {
-                                Name = u.Name,
-                                Age = u.Age,
-                                Email = u.Email,
-                                Roles = u.Roles
-                            }
-                        )
-                        .ToList();
+                        .Include(user => user.Roles)
+                        .Where(u => u.Id == id);
             return users.First();
         }
 
         // POST api/<UserController>
         [HttpPost]
-        public void Post([FromBody] User value)
+        public void PostUser([FromBody] User value)
         {
-            User user = new User();
-            user.Id = Guid.NewGuid();
-            user.Name = value.Name;
-            user.Age = value.Age;
-            user.Email = value.Email;
+            try
+            {
+                ValidateUser(value);
+                ValidateEmail(value);
+                value.Id = Guid.NewGuid();
+                _db.Users.Add(value);
+                _db.SaveChanges();
+            }
+            catch (ArgumentNullException)
+            {
 
-            _db.Users.Add(user);
-            _db.SaveChanges();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public void Put(Guid id, [FromBody] User value)
+        public void PutUser(Guid id, [FromBody] User value)
         {
-            User user = new User();
-            user.Id = id;
-            user.Name = value.Name;
-            user.Age = value.Age;
-            user.Email = value.Email;
-            _db.Users.Update(user);
-            _db.SaveChanges();
+            try
+            {
+                ValidateUser(value);
+                value.Id = id;
+                _db.Users.Update(value);
+                _db.SaveChanges();
+            }
+            catch (ArgumentNullException)
+            {
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         // PUT api/<UserController>/AddRole/5
         [HttpPatch("AddRole/{id}")]
-        public void Patch(Guid id, [FromBody] Role value) 
+        public void AddUserRole(Guid id, [FromBody] Role value) 
         {
             User? user = _db.Users.Find(id);
             Role? role = _db.Roles.Find(value.Id);
@@ -93,7 +134,7 @@ namespace VEBuserAPI.Controllers
 
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public void Delete(Guid id)
+        public void DeleteUser(Guid id)
         {
             User user = new User();
             user.Id = id;
